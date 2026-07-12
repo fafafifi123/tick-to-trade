@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MovingAverageCrossoverStrategyTest {
 
@@ -25,12 +26,42 @@ class MovingAverageCrossoverStrategyTest {
     }
 
     @Test
+    void emitsSellSignalWhenShortAverageCrossesBelowLongAverage() {
+        MovingAverageCrossoverStrategy strategy = new MovingAverageCrossoverStrategy("AAPL", 2, 4, 100);
+
+        // Warm up flat, then cross up (BUY), then cross back down (SELL).
+        feed(strategy, "AAPL", 100, 100, 100, 100, 110);
+        Signal signal = strategy.evaluate(new Tick("AAPL", 80, 100, System.nanoTime(), System.nanoTime()));
+
+        assertEquals(Side.SELL, signal.side());
+        assertEquals(100, signal.quantity());
+    }
+
+    @Test
     void ignoresTicksForOtherSymbols() {
         MovingAverageCrossoverStrategy strategy = new MovingAverageCrossoverStrategy("AAPL", 2, 4, 100);
 
         Signal signal = strategy.evaluate(new Tick("MSFT", 100, 100, 1, 1));
 
         assertFalse(signal.actionable());
+    }
+
+    @Test
+    void rejectsNonPositiveShortPeriod() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new MovingAverageCrossoverStrategy("AAPL", 0, 4, 100));
+    }
+
+    @Test
+    void rejectsNonPositiveLongPeriod() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new MovingAverageCrossoverStrategy("AAPL", 2, 0, 100));
+    }
+
+    @Test
+    void rejectsShortPeriodNotSmallerThanLongPeriod() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new MovingAverageCrossoverStrategy("AAPL", 4, 4, 100));
     }
 
     private static java.util.List<Signal> feed(AlphaStrategy strategy, String symbol, double... prices) {
