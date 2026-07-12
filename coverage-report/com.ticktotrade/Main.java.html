@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tick-to-trade</a> &gt; <a href="index.source.html" class="el_package">com.ticktotrade</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">package com.ticktotrade;
+
+import com.ticktotrade.alpha.MovingAverageCrossoverStrategy;
+import com.ticktotrade.broker.SimulatedBrokerGateway;
+import com.ticktotrade.engine.LatencyRecorder;
+import com.ticktotrade.engine.TradingEngine;
+import com.ticktotrade.feed.SimulatedMarketDataFeed;
+import com.ticktotrade.model.Tick;
+
+import java.util.Random;
+
+/**
+ * End-to-end wiring demo: simulated feed -&gt; moving average alpha -&gt; simulated
+ * broker. Run with {@code mvn -q exec:java} or from your IDE. Swap the
+ * simulated feed/broker for real adapters without touching TradingEngine.
+ */
+<span class="nc" id="L17">public final class Main {</span>
+
+    public static void main(String[] args) {
+<span class="nc" id="L20">        String symbol = &quot;AAPL&quot;;</span>
+<span class="nc" id="L21">        SimulatedMarketDataFeed feed = new SimulatedMarketDataFeed();</span>
+<span class="nc" id="L22">        SimulatedBrokerGateway broker = new SimulatedBrokerGateway();</span>
+<span class="nc" id="L23">        LatencyRecorder latencyRecorder = new LatencyRecorder(10_000);</span>
+<span class="nc" id="L24">        MovingAverageCrossoverStrategy strategy = new MovingAverageCrossoverStrategy(symbol, 5, 20, 100);</span>
+<span class="nc" id="L25">        TradingEngine engine = new TradingEngine(strategy, broker, latencyRecorder);</span>
+
+<span class="nc" id="L27">        feed.subscribe(symbol, engine);</span>
+<span class="nc" id="L28">        feed.start();</span>
+
+<span class="nc" id="L30">        Random random = new Random(42);</span>
+<span class="nc" id="L31">        double price = 150.0;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        for (int i = 0; i &lt; 5_000; i++) {</span>
+<span class="nc" id="L33">            price += (random.nextDouble() - 0.5);</span>
+<span class="nc" id="L34">            long now = System.nanoTime();</span>
+<span class="nc" id="L35">            feed.publish(new Tick(symbol, price, 100, now, now));</span>
+        }
+<span class="nc" id="L37">        feed.stop();</span>
+
+<span class="nc" id="L39">        System.out.printf(&quot;Ticks processed: 5000%n&quot;);</span>
+<span class="nc" id="L40">        System.out.printf(&quot;Orders sent: %d%n&quot;, broker.acceptedOrders().size());</span>
+<span class="nc" id="L41">        System.out.printf(&quot;Tick-to-order latency: mean=%.0fns p99=%dns max=%dns (n=%d)%n&quot;,</span>
+<span class="nc" id="L42">                latencyRecorder.meanNanos(),</span>
+<span class="nc" id="L43">                latencyRecorder.percentileNanos(99),</span>
+<span class="nc" id="L44">                latencyRecorder.maxNanos(),</span>
+<span class="nc" id="L45">                latencyRecorder.count());</span>
+<span class="nc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

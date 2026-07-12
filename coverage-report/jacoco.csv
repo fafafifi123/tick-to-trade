@@ -1,0 +1,13 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+tick-to-trade,com.ticktotrade.feed,SimulatedMarketDataFeed,4,59,0,6,2,15,1,8,1,5
+tick-to-trade,com.ticktotrade.model,Order,0,18,0,0,0,1,0,1,0,1
+tick-to-trade,com.ticktotrade.model,Side,0,15,0,0,0,3,0,1,0,1
+tick-to-trade,com.ticktotrade.model,Signal,0,31,0,0,0,3,0,3,0,3
+tick-to-trade,com.ticktotrade.model,Tick,0,18,0,0,0,1,0,1,0,1
+tick-to-trade,com.ticktotrade.model,OrderResult,0,12,0,0,0,1,0,1,0,1
+tick-to-trade,com.ticktotrade.model,OrderResult.OrderStatus,0,15,0,0,0,3,0,1,0,1
+tick-to-trade,com.ticktotrade.engine,TradingEngine,3,48,0,2,1,12,1,3,1,2
+tick-to-trade,com.ticktotrade.engine,LatencyRecorder,0,125,0,10,0,26,0,11,0,6
+tick-to-trade,com.ticktotrade,Main,125,0,2,0,24,0,3,0,2,0
+tick-to-trade,com.ticktotrade.broker,SimulatedBrokerGateway,0,34,0,0,0,7,0,3,0,3
+tick-to-trade,com.ticktotrade.alpha,MovingAverageCrossoverStrategy,1,222,5,25,0,38,5,12,0,2

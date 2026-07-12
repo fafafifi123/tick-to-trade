@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TradingEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tick-to-trade</a> &gt; <a href="index.source.html" class="el_package">com.ticktotrade.engine</a> &gt; <span class="el_source">TradingEngine.java</span></div><h1>TradingEngine.java</h1><pre class="source lang-java linenums">package com.ticktotrade.engine;
+
+import com.ticktotrade.alpha.AlphaStrategy;
+import com.ticktotrade.broker.BrokerGateway;
+import com.ticktotrade.feed.TickListener;
+import com.ticktotrade.model.Order;
+import com.ticktotrade.model.Signal;
+import com.ticktotrade.model.Tick;
+
+/**
+ * Wires a tick to an alpha decision to a broker order, measuring the
+ * tick-to-order latency on every call. This is the tick-to-trade hot path:
+ * {@link #onTick} must stay allocation-light and must never block on I/O.
+ * &lt;p&gt;
+ * All three collaborators are interfaces, so unit tests inject mocks or fakes
+ * for the strategy and the broker without needing a real market data feed,
+ * network socket, or broker connection.
+ */
+public final class TradingEngine implements TickListener {
+
+    private final AlphaStrategy alphaStrategy;
+    private final BrokerGateway brokerGateway;
+    private final LatencyRecorder latencyRecorder;
+
+<span class="fc" id="L25">    public TradingEngine(AlphaStrategy alphaStrategy, BrokerGateway brokerGateway, LatencyRecorder latencyRecorder) {</span>
+<span class="fc" id="L26">        this.alphaStrategy = alphaStrategy;</span>
+<span class="fc" id="L27">        this.brokerGateway = brokerGateway;</span>
+<span class="fc" id="L28">        this.latencyRecorder = latencyRecorder;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    public void onTick(Tick tick) {
+<span class="fc" id="L33">        Signal signal = alphaStrategy.evaluate(tick);</span>
+
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (signal.actionable()) {</span>
+<span class="fc" id="L36">            long now = System.nanoTime();</span>
+<span class="fc" id="L37">            Order order = new Order(signal.symbol(), signal.side(), signal.quantity(), tick.price(), now);</span>
+<span class="fc" id="L38">            brokerGateway.send(order);</span>
+<span class="fc" id="L39">            latencyRecorder.record(now - tick.arrivalTimestampNanos());</span>
+        }
+<span class="fc" id="L41">    }</span>
+
+    public LatencyRecorder latencyRecorder() {
+<span class="nc" id="L44">        return latencyRecorder;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
